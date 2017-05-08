@@ -2,6 +2,7 @@ import os
 import sys
 import numpy as np
 from datetime import datetime
+import math
 
 data_folder = './data'
 filelist = os.listdir(data_folder)
@@ -48,9 +49,9 @@ def read_csv(filename):
 		data.append(linedata)
 		line = fin.readline()
 	data = np.array(data)
-	return data, kept_attrs
+	return data
 
-def align(data1, data2, index1=1,index2=1,eps=0.001,threshold=0):
+def align_old(data1, data2, index1=1,index2=1,eps=0.001,threshold=0):
 	# reverse if necessary
 	data1 = data1[data1[:,0].argsort()]
 	data2 = data2[data2[:,0].argsort()]
@@ -76,10 +77,39 @@ def align(data1, data2, index1=1,index2=1,eps=0.001,threshold=0):
 	res = res[((res >= threshold).sum(1) == 3)]
 	return res
 
-def get_data(filename1, filename2):
-	data1, kept_attrs1 = read_csv(filename1)
-	data2, kept_attrs2 = read_csv(filename2)
-	res = align(data1, data2)
+def align(datas, index=1,eps=0.001,threshold=0):
+	# reverse if necessary
+	datas = [x[x[:,0].argsort()] for x in datas]
+
+	ind = 0
+	inds = np.zeros(len(datas)).astype('int')
+	maxinds = np.array([x.shape[0] for x in datas])
+	res = np.zeros((int(math.ceil(maxinds.min())),1+len(datas)))
+
+	while (inds < maxinds).all():
+		cur_time = map(lambda i: datas[i][inds[i]][0], range(len(datas)))
+		if min(cur_time) == max(cur_time):
+			res[ind][0] = datas[0][inds[0]][0]
+			for i in xrange(len(datas)):
+				res[ind][i+1] = datas[i][inds[i]][index]
+			ind += 1
+			inds = inds + 1
+		else:
+			max_time = max(cur_time)
+			for i in xrange(len(datas)):
+				if cur_time[i] < max_time: 
+					inds[i] += 1
+
+	res = res[:ind,:]
+	# remove unavailable ones
+	res = res[((res >= threshold).sum(1) == 1+len(datas))]
+	return res
+
+def get_data(filenames):
+	datas = []
+	for filename in filenames:
+		datas.append(read_csv(filename))
+	res = align(datas)
 	return res
 
 ## test 
