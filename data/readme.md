@@ -21,6 +21,6 @@ Stocks: based on Yahoo Finance. All prices are by days.
 Google search trend: all file names are GST-XXX.csv, where XXX is the stock tick of the company.
 **Note** that Google search trend only provides monthly index
 
-- US.csv:   US exports, imports, balance by month
+- us.csv:   US exports, imports, balance by month
 - euro.csv: euro-USD currency exchange rate by month
-- CNY.csv:  Chinese yuan-USD currency exchange rate by month
+- cny.csv:  Chinese yuan-USD currency exchange rate by month
